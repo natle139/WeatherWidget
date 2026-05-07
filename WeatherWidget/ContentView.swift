@@ -2,7 +2,7 @@
 //  ContentView.swift
 //  WeatherWidget
 //
-//  Created by Lan Le on 7/5/2026.
+//  Created by Natalie Le on 7/5/2026.
 //
 
 import SwiftUI
