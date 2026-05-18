@@ -41,15 +41,52 @@ struct SimpleEntry: TimelineEntry {
     let configuration: ConfigurationAppIntent
 }
 
-struct CyberForecastEntryView : View {
+struct CyberForecastEntryView: View {
     var entry: Provider.Entry
+    
+    @Environment(\.widgetFamily) var widgetFamily
 
     var body: some View {
-        VStack {
-            Text("Time:")
-            Text(entry.date, style: .time)
+        switch widgetFamily {
+            
+        case .systemSmall:
+            // Small widget layout
+            VStack(spacing: 4) {
+                Text(entry.configuration.favoriteEmoji)
+                    .font(.largeTitle)
+                Text(entry.date, style: .time)
+                    .font(.caption)
+            }
 
-            Text("Favorite Emoji:")
+        case .systemMedium:
+            // Medium widget layout
+            HStack(spacing: 16) {
+                Text(entry.configuration.favoriteEmoji)
+                    .font(.largeTitle)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Time:")
+                        .font(.headline)
+                    Text(entry.date, style: .time)
+                        .font(.body)
+                }
+            }
+
+        case .systemLarge:
+            // Large widget layout
+            VStack(spacing: 12) {
+                Text(entry.configuration.favoriteEmoji)
+                    .font(.system(size: 60))
+                Text("Time:")
+                    .font(.title2)
+                Text(entry.date, style: .time)
+                    .font(.title)
+                Text("Favorite Emoji:")
+                    .font(.headline)
+                    .padding(.top, 8)
+            }
+
+        default:
+            // Fallback for any other sizes (e.g. accessory/lock screen)
             Text(entry.configuration.favoriteEmoji)
         }
     }
@@ -63,5 +100,6 @@ struct CyberForecast: Widget {
             CyberForecastEntryView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
