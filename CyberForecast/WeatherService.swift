@@ -3,24 +3,40 @@ import CoreLocation
 
 // OpenWeather asset mapping
 enum RetroWeatherAsset: String {
-    case sunny = "weather_sunny"
-    case mostlySunny = "weather_mostly_sunny"
-    case partlyCloudy = "weather_partly_cloudy"
-    case cloudy = "weather_cloudy"
-    case mostlyCloudy = "weather_mostly_cloudy"
-    case rain = "weather_rain"
-    case heavyRain = "weather_heavy_rain"
-    case thunderstorm = "weather_thunderstorm"
-    case sleet = "weather_sleet"
-    case snow = "weather_snow"
-    case heavySnow = "weather_heavy_snow"
-    case foggy = "weather_foggy"
-    case clearNight = "weather_clear_night"
+    case sunny        = "SunnySet"
+    case mostlySunny  = "MostlySunnySet"
+    case partlyCloudy = "PartlyCloudySet"
+    case cloudy       = "CloudySet"
+    case mostlyCloudy = "OvercastSet"
+    case rain         = "RainingSet"
+    case heavyRain    = "HeavyRainSet"
+    case thunderstorm = "ThunderstormSet"
+    case sleet        = "SleetSet"
+    case snow         = "SnowingSet"
+    case heavySnow    = "HeavySnowSet"
+    case foggy        = "FoggySet"
+    case clearNight   = "ClearNightSet"
+    case lightning    = "LightningSet"     // available but currently unused
+    case windy        = "WindySet"
+
     
     var labelText: String {
         switch self {
-        case .clearNight: return "CLEAR NIGHT"
-        default: return self.rawValue.replacingOccurrences(of: "weather_", with: "").replacingOccurrences(of: "_", with: " ").uppercased()
+        case .sunny:        return "SUNNY"
+        case .mostlySunny:  return "MOSTLY SUNNY"
+        case .partlyCloudy: return "PARTLY CLOUDY"
+        case .cloudy:       return "CLOUDY"
+        case .mostlyCloudy: return "OVERCAST"
+        case .rain:         return "RAIN"
+        case .heavyRain:    return "HEAVY RAIN"
+        case .thunderstorm: return "THUNDERSTORM"
+        case .sleet:        return "SLEET"
+        case .snow:         return "SNOW"
+        case .heavySnow:    return "HEAVY SNOW"
+        case .foggy:        return "FOGGY"
+        case .clearNight:   return "CLEAR NIGHT"
+        case .lightning:    return "LIGHTNING"
+        case .windy:        return "WINDY"
         }
     }
     

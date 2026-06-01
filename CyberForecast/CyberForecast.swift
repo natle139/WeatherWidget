@@ -15,33 +15,32 @@ struct SimpleEntry: TimelineEntry {
 }
 
 struct Provider: AppIntentTimelineProvider {
-    // Fallback data structure for compilation and rendering previews
-        private static var placeholderWeather: WeatherData {
-            WeatherData(
-                city: "SYDNEY",
-                date: Date(),
-                temperature: 24.0,
-                asset: .sunny,
-                high: 27.0,
-                low: 16.0,
-                uvIndex: 0.0,
-                humidity: 62.0,
-                sunrise: "06:42",
-                sunset: "17:03",
-                hourly: [
-                    HourlyForecast(time: "12:00", asset: .sunny),
-                    HourlyForecast(time: "13:00", asset: .mostlySunny),
-                    HourlyForecast(time: "14:00", asset: .partlyCloudy),
-                    HourlyForecast(time: "15:00", asset: .clearNight)
-                ],
-                daily: [
-                    DailyForecast(dayName: "WED", high: 25.0, low: 15.0, asset: .rain),
-                    DailyForecast(dayName: "THU", high: 22.0, low: 13.0, asset: .cloudy)
-                ],
-                isPlaceholder: true
-            )
-        }
-    
+    private static var placeholderWeather: WeatherData {
+        WeatherData(
+            city: "SYDNEY",
+            date: Date(),
+            temperature: 22.0,
+            asset: .sunny,
+            high: 24.0,
+            low: 18.0,
+            uvIndex: 6.0,
+            humidity: 62.0,
+            sunrise: "06:42",
+            sunset: "17:03",
+            hourly: [
+                HourlyForecast(time: "12:00", asset: .sunny),
+                HourlyForecast(time: "13:00", asset: .mostlySunny),
+                HourlyForecast(time: "14:00", asset: .partlyCloudy),
+                HourlyForecast(time: "15:00", asset: .clearNight)
+            ],
+            daily: [
+                DailyForecast(dayName: "WED", high: 25.0, low: 15.0, asset: .rain),
+                DailyForecast(dayName: "THU", high: 22.0, low: 13.0, asset: .cloudy)
+            ],
+            isPlaceholder: true
+        )
+    }
+
     func placeholder(in context: Context) -> SimpleEntry {
         SimpleEntry(date: Date(), configuration: ConfigurationAppIntent(), weather: Self.placeholderWeather)
     }
@@ -49,76 +48,101 @@ struct Provider: AppIntentTimelineProvider {
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
         SimpleEntry(date: Date(), configuration: configuration, weather: Self.placeholderWeather)
     }
-    
+
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
-        var entries: [SimpleEntry] = []
-
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, configuration: configuration, weather: Self.placeholderWeather)
-            entries.append(entry)
-        }
-
-        return Timeline(entries: entries, policy: .atEnd)
+        let weather = (try? await WeatherService.fetch()) ?? Self.placeholderWeather
+        let entry = SimpleEntry(date: Date(), configuration: configuration, weather: weather)
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 30, to: Date())!
+        return Timeline(entries: [entry], policy: .after(nextUpdate))
     }
-
-//    func relevances() async -> WidgetRelevances<ConfigurationAppIntent> {
-//        // Generate a list containing the contexts this widget is relevant in.
-//    }
 }
+
+// MARK: - Small Widget View
+
+struct SmallWidgetView: View {
+    let data: WeatherData
+    let terminalGreen = Color(red: 0.18, green: 0.95, blue: 0.35)
+
+    var body: some View {
+
+        return ZStack {
+            Color.black.ignoresSafeArea()
+
+            VStack(alignment: .leading, spacing: 0) {
+
+                // City + Icon
+                HStack(alignment: .top) {
+                    Text(data.city)
+                        .font(.custom("VT323-Regular", fixedSize: 20))
+                        .foregroundColor(terminalGreen)
+                        .lineLimit(1)
+                    Spacer()
+                    Image(data.weatherIconName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 36, height: 36)
+                        .colorMultiply(terminalGreen)
+                }
+
+                // Dashed divider
+                Text("- - - - - - - - -")
+                    .font(.custom("VT323-Regular", fixedSize: 12))
+                    .foregroundColor(terminalGreen)
+                    .padding(.vertical, 2)
+
+                // Temp
+                Text("TEMP: \(Int(data.temperature))°C")
+                    .font(.custom("VT323-Regular", fixedSize: 18))
+                    .foregroundColor(terminalGreen)
+                    .padding(.bottom, 2)
+
+                // Condition
+                Text("COND: \(data.weatherCondition)")
+                    .font(.custom("VT323-Regular", fixedSize: 18))
+                    .foregroundColor(terminalGreen)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .padding(.bottom, 2)
+
+                Spacer()
+
+                // Hi / Lo
+                Text("H: \(Int(data.high))°C  L: \(Int(data.low))°C")
+                    .font(.custom("VT323-Regular", fixedSize: 16))
+                    .foregroundColor(terminalGreen)
+            }
+            .padding(8)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(terminalGreen, lineWidth: 2.5)
+        )
+        .cornerRadius(20)
+    }
+}
+
+// MARK: - Entry View
 
 struct CyberForecastEntryView: View {
     var entry: Provider.Entry
-    
     @Environment(\.widgetFamily) var widgetFamily
 
     var body: some View {
         switch widgetFamily {
-            
         case .systemSmall:
-            // Small widget layout
-            VStack(spacing: 4) {
-                Text(entry.configuration.favoriteEmoji)
-                    .font(.largeTitle)
-                Text(entry.date, style: .time)
-                    .font(.caption)
-            }
-
+            SmallWidgetView(data: entry.weather)
         case .systemMedium:
-            // Medium widget layout
-            HStack(spacing: 16) {
-                Text(entry.configuration.favoriteEmoji)
-                    .font(.largeTitle)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Time:")
-                        .font(.headline)
-                    Text(entry.date, style: .time)
-                        .font(.body)
-                }
-            }
-
+            SmallWidgetView(data: entry.weather)
         case .systemLarge:
-            // Large widget layout
-            VStack(spacing: 12) {
-                Text(entry.configuration.favoriteEmoji)
-                    .font(.system(size: 60))
-                Text("Time:")
-                    .font(.title2)
-                Text(entry.date, style: .time)
-                    .font(.title)
-                Text("Favorite Emoji:")
-                    .font(.headline)
-                    .padding(.top, 8)
-            }
-
+            SmallWidgetView(data: entry.weather)
         default:
-            // Fallback for any other sizes (e.g. accessory/lock screen)
-            Text(entry.configuration.favoriteEmoji)
+            SmallWidgetView(data: entry.weather)
         }
     }
 }
+
+// MARK: - Widget
 
 struct CyberForecast: Widget {
     let kind: String = "CyberForecast"
@@ -126,7 +150,7 @@ struct CyberForecast: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
             CyberForecastEntryView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+                .containerBackground(Color.black, for: .widget)
         }
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }

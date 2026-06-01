@@ -10,6 +10,8 @@
 		250B0A052FAC881400D5853C /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 250B0A042FAC881400D5853C /* WidgetKit.framework */; };
 		250B0A072FAC881400D5853C /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 250B0A062FAC881400D5853C /* SwiftUI.framework */; };
 		250B0A162FAC881500D5853C /* CyberForecastExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 250B0A022FAC881400D5853C /* CyberForecastExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		FEAE75FF2FCD34AC00EDCA6A /* VT323-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FEAE75FE2FCD34AC00EDCA6A /* VT323-Regular.ttf */; };
+		FEAE76002FCD34AC00EDCA6A /* VT323-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FEAE75FE2FCD34AC00EDCA6A /* VT323-Regular.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,15 +44,16 @@
 		250B0A042FAC881400D5853C /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		250B0A062FAC881400D5853C /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		25A168C42FAD89BA00AA47B4 /* CyberForecastExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CyberForecastExtension.entitlements; sourceTree = "<group>"; };
+		FEAE75FE2FCD34AC00EDCA6A /* VT323-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "VT323-Regular.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		250B0A172FAC881500D5853C /* Exceptions for "CyberForecast" folder in "CyberForecastExtension" target */ = {
+		FE4BD5E52FC5C1C000465C4A /* Exceptions for "CyberForecast" folder in "WeatherWidget" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 250B0A012FAC881400D5853C /* CyberForecastExtension */;
+			target = 250B09EF2FAC86C500D5853C /* WeatherWidget */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -63,7 +66,7 @@
 		250B0A082FAC881400D5853C /* CyberForecast */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				250B0A172FAC881500D5853C /* Exceptions for "CyberForecast" folder in "CyberForecastExtension" target */,
+				FE4BD5E52FC5C1C000465C4A /* Exceptions for "CyberForecast" folder in "WeatherWidget" target */,
 			);
 			path = CyberForecast;
 			sourceTree = "<group>";
@@ -98,6 +101,7 @@
 				250B0A082FAC881400D5853C /* CyberForecast */,
 				250B0A032FAC881400D5853C /* Frameworks */,
 				250B09F12FAC86C500D5853C /* Products */,
+				FEAE75FE2FCD34AC00EDCA6A /* VT323-Regular.ttf */,
 			);
 			sourceTree = "<group>";
 		};
@@ -211,6 +215,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FEAE76002FCD34AC00EDCA6A /* VT323-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -218,6 +223,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FEAE75FF2FCD34AC00EDCA6A /* VT323-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
