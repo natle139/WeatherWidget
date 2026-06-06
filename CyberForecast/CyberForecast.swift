@@ -57,11 +57,102 @@ struct Provider: AppIntentTimelineProvider {
     }
 }
 
+// MARK: - Shared Style Constants
+private let terminalGreen = Color(red: 0.318, green: 0.722, blue: 0.357) // #51B85B
+private let dimGreen      = Color(red: 0.318, green: 0.722, blue: 0.357).opacity(0.45)
+
+// MARK: - Shared Helpers
+
+private func timeString(from date: Date) -> String {
+    let f = DateFormatter()
+    f.dateFormat = "HH:mm" // time string "11:00"
+    return f.string(from: date)
+}
+
+private func ordinalDate(_ date: Date, includeDayName: Bool) -> String {
+    let f = DateFormatter()
+        f.dateFormat = includeDayName ? "EEE d MMM yyyy" : "d MMM yyyy"
+        // gives either "Tue 16 Mar 2026" or "16 Mar 2026"
+        // inject the ordinal suffix after the day number
+        let day = Calendar.current.component(.day, from: date)
+        let suffix: String = {
+            switch day {
+            case 11, 12, 13: return "TH"
+            case let d where d % 10 == 1: return "ST"
+            case let d where d % 10 == 2: return "ND"
+            case let d where d % 10 == 3: return "RD"
+            default: return "TH"
+            }
+        }()
+        let base = f.string(from: date).uppercased() // "TUE 16 MAR 2026"
+        return base.replacingOccurrences(of: "\(day) ", with: "\(day)\(suffix) ") // e.g. "16TH"
+}
+
+// MARK: - Shared Subviews
+
+// Dashed divider
+private struct TerminalDivider: View {
+    var body: some View {
+        Text(String(repeating: "- ", count: 30))
+            .font(.custom("VT323-Regular", fixedSize: 11))
+            .foregroundColor(dimGreen)
+            .lineLimit(1)
+    }
+}
+
+private struct WeatherIcon: View {
+    let asset: RetroWeatherAsset
+    let size: CGFloat
+    var body: some View {
+        Image(asset.rawValue)
+            .resizable()
+            .scaledToFit()
+            .frame(width: size, height: size)
+    }
+}
+
+// Inline hourly strip: 12:00 [icon] 13:00 [icon] (medium and large widgets)
+private struct HourlyStrip: View {
+    let forecasts: [HourlyForecast]
+    let iconSize: CGFloat
+    let fontSize: CGFloat
+ 
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(forecasts.prefix(4)) { f in
+                Text(f.time)
+                    .font(.custom("VT323-Regular", fixedSize: fontSize))
+                    .foregroundColor(terminalGreen)
+                WeatherIcon(asset: f.asset, size: iconSize)
+            }
+            Spacer(minLength: 0)
+        }
+    }
+}
+
+// Daily row: WED >> H: L: [icon]
+private struct DailyRow: View {
+    let forecast: DailyForecast
+    let iconSize: CGFloat
+    let fontSize: CGFloat
+ 
+    var body: some View {
+        HStack(spacing: 4) {
+            Text("\(forecast.dayName) >> H: \(Int(forecast.high))°C L: \(Int(forecast.low))°C")
+                .font(.custom("VT323-Regular", fixedSize: fontSize))
+                .foregroundColor(terminalGreen)
+            WeatherIcon(asset: forecast.asset, size: iconSize)
+            Spacer(minLength: 0)
+        }
+    }
+}
+
 // MARK: - Small Widget View
 
 struct SmallWidgetView: View {
     let data: WeatherData
-    let terminalGreen = Color(red: 0.18, green: 0.95, blue: 0.35)
+//    let terminalGreen = Color(red: 0.18, green: 0.95, blue: 0.35)
+//    REASON: moved to shared constants, changed color to match the one on Figma
 
     var body: some View {
 
@@ -77,17 +168,20 @@ struct SmallWidgetView: View {
                         .foregroundColor(terminalGreen)
                         .lineLimit(1)
                     Spacer()
-                    Image(data.weatherIconName)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 36, height: 36)
-                        .colorMultiply(terminalGreen)
+//                    Image(data.weatherIconName)
+//                        .resizable()
+//                        .scaledToFit()
+//                        .frame(width: 36, height: 36)
+//                        .colorMultiply(terminalGreen)
+                    WeatherIcon(asset: data.asset, size: 36)
                 }
 
                 // Dashed divider
-                Text("- - - - - - - - -")
-                    .font(.custom("VT323-Regular", fixedSize: 12))
-                    .foregroundColor(terminalGreen)
+//                Text("- - - - - - - - -")
+//                    .font(.custom("VT323-Regular", fixedSize: 12))
+//                    .foregroundColor(terminalGreen)
+//                    .padding(.vertical, 2)
+                TerminalDivider()
                     .padding(.vertical, 2)
 
                 // Temp
@@ -122,6 +216,125 @@ struct SmallWidgetView: View {
     }
 }
 
+// MARK: - Medium Widget View
+
+struct MediumWidgetView: View {
+    let data: WeatherData
+     
+        private var dateString: String { ordinalDate(data.date, includeDayName: false) }
+     
+        var body: some View {
+            ZStack {
+                Color.black.ignoresSafeArea()
+                VStack(alignment: .leading, spacing: 0) {
+     
+                    // CITY - DATE - TIME  +  floating icon top-right
+                    HStack(alignment: .top) {
+                        Text("\(data.city) - \(dateString) - \(timeString(from: data.date))")
+                            .font(.custom("VT323-Regular", fixedSize: 17))
+                            .foregroundColor(terminalGreen)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                        Spacer()
+                        WeatherIcon(asset: data.asset, size: 48)
+                    }
+     
+                    TerminalDivider()
+                        .padding(.vertical, 4)
+     
+                    // TEMP + COND on one line
+                    Text("TEMP: \(Int(data.temperature))°C  COND: \(data.weatherCondition)")
+                        .font(.custom("VT323-Regular", fixedSize: 18))
+                        .foregroundColor(terminalGreen)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .padding(.bottom, 3)
+     
+                    // H / L
+                    Text("H: \(Int(data.high))°C  L: \(Int(data.low))°C")
+                        .font(.custom("VT323-Regular", fixedSize: 18))
+                        .foregroundColor(terminalGreen)
+     
+                    Spacer()
+     
+                    // Hourly forecast
+                    HourlyStrip(forecasts: data.hourly, iconSize: 22, fontSize: 17)
+                }
+                .padding(10)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            }
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(terminalGreen, lineWidth: 2.5))
+            .cornerRadius(20)
+        }
+}
+
+// MARK: - Large Widget View
+
+struct LargeWidgetView: View {
+    let data: WeatherData
+    
+    private var dateString: String { ordinalDate(data.date, includeDayName: true) }
+    
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            VStack(alignment: .leading, spacing: 0) {
+                
+                // Small date line
+                Text(dateString)
+                    .font(.custom("VT323-Regular", fixedSize: 16))
+                    .foregroundColor(terminalGreen)
+                    .padding(.bottom, 1)
+                
+                // Big CITY - TIME  +  large icon top-right
+                HStack(alignment: .top) {
+                    Text("\(data.city) - \(timeString(from: data.date))")
+                        .font(.custom("VT323-Regular", fixedSize: 30))
+                        .foregroundColor(terminalGreen)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    Spacer()
+                    WeatherIcon(asset: data.asset, size: 72)
+                }
+                
+                TerminalDivider()
+                    .padding(.vertical, 5)
+                
+                // Info lines
+                Group {
+                    Text("TEMP: \(Int(data.temperature))°C")
+                    Text("COND: \(data.weatherCondition)")
+                    Text("H: \(Int(data.high))°C  L: \(Int(data.low))°C")
+                    Text("UV INDEX: \(Int(data.uvIndex))  HUMIDITY: \(Int(data.humidity))%")
+                    Text("SUNRISE: \(data.sunrise)  SUNSET: \(data.sunset)")
+                }
+                .font(.custom("VT323-Regular", fixedSize: 19))
+                .foregroundColor(terminalGreen)
+                .padding(.bottom, 1)
+                
+                TerminalDivider()
+                    .padding(.vertical, 5)
+                
+                // Hourly forecast
+                HourlyStrip(forecasts: data.hourly, iconSize: 26, fontSize: 18)
+                    .padding(.bottom, 4)
+                
+                // Daily forecast rows: 2
+                ForEach(data.daily.prefix(2)) { forecast in
+                    DailyRow(forecast: forecast, iconSize: 22, fontSize: 19)
+                        .padding(.bottom, 2)
+                }
+                
+                Spacer(minLength: 0)
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        }
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(terminalGreen, lineWidth: 2.5))
+        .cornerRadius(20)
+    }
+}
+
 // MARK: - Entry View
 
 struct CyberForecastEntryView: View {
@@ -133,9 +346,9 @@ struct CyberForecastEntryView: View {
         case .systemSmall:
             SmallWidgetView(data: entry.weather)
         case .systemMedium:
-            SmallWidgetView(data: entry.weather)
+            MediumWidgetView(data: entry.weather)
         case .systemLarge:
-            SmallWidgetView(data: entry.weather)
+            LargeWidgetView(data: entry.weather)
         default:
             SmallWidgetView(data: entry.weather)
         }
