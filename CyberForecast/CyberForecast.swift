@@ -368,3 +368,37 @@ struct CyberForecast: Widget {
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
+
+// MARK: - Previews
+
+#Preview(as: .systemSmall) {
+    CyberForecast()
+} timeline: {
+    SimpleEntry(
+        date: Date(),
+        configuration: ConfigurationAppIntent(),
+        weather: WeatherData(
+            city: "SYDNEY",
+            date: Date(),
+            temperature: 22.0,
+            asset: .sunny,
+            high: 24.0,
+            low: 18.0,
+            uvIndex: 6.0,
+            humidity: 62.0,
+            sunrise: "06:42",
+            sunset: "17:03",
+            hourly: [
+                HourlyForecast(time: "12:00", asset: .sunny),
+                HourlyForecast(time: "13:00", asset: .mostlySunny),
+                HourlyForecast(time: "14:00", asset: .partlyCloudy),
+                HourlyForecast(time: "15:00", asset: .clearNight)
+            ],
+            daily: [
+                DailyForecast(dayName: "WED", high: 25.0, low: 15.0, asset: .rain),
+                DailyForecast(dayName: "THU", high: 22.0, low: 13.0, asset: .cloudy)
+            ],
+            isPlaceholder: false
+        )
+    )
+}
