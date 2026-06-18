@@ -151,8 +151,6 @@ private struct DailyRow: View {
 
 struct SmallWidgetView: View {
     let data: WeatherData
-//    let terminalGreen = Color(red: 0.18, green: 0.95, blue: 0.35)
-//    REASON: moved to shared constants, changed color to match the one on Figma
 
     var body: some View {
 
@@ -168,19 +166,9 @@ struct SmallWidgetView: View {
                         .foregroundColor(terminalGreen)
                         .lineLimit(1)
                     Spacer()
-//                    Image(data.weatherIconName)
-//                        .resizable()
-//                        .scaledToFit()
-//                        .frame(width: 36, height: 36)
-//                        .colorMultiply(terminalGreen)
                     WeatherIcon(asset: data.asset, size: 36)
                 }
 
-                // Dashed divider
-//                Text("- - - - - - - - -")
-//                    .font(.custom("VT323-Regular", fixedSize: 12))
-//                    .foregroundColor(terminalGreen)
-//                    .padding(.vertical, 2)
                 TerminalDivider()
                     .padding(.vertical, 2)
 
